@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading History Dashboard - Roh_ana Phase 2</title>
+    <!-- Tailwind CSS for Modern Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #1e293b; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Header Section -->
+        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 p-6 rounded-2xl border border-slate-800 backdrop-blur-md">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-2xl font-bold text-white tracking-wide">Roh_ana - Phase 2</h1>
+                    <span class="px-2.5 py-1 text-xs font-semibold bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full">Hedge Account</span>
+                </div>
+                <p class="text-slate-400 text-sm mt-1">Account ID: <span class="text-slate-200 font-mono">556630</span> | FHXmarkets Ltd. (USD)</p>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-slate-400 bg-slate-950/50 px-4 py-2 rounded-xl border border-slate-800">
+                <i data-lucide="calendar" class="w-4 h-4 text-slate-400"></i>
+                <span>Report Date: <strong class="text-slate-200">2026.08.21 11:24</strong></span>
+            </div>
+        </header>
+
+        <!-- Dynamic Performance Metrics Grid -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800/80 hover:border-slate-700 transition">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-medium uppercase tracking-wider">Net Profit</span>
+                    <i data-lucide="dollar-sign" class="w-4 h-4 text-emerald-400"></i>
+                </div>
+                <div id="stat-net-profit" class="text-2xl font-bold text-slate-100">$0.00</div>
+            </div>
+
+            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800/80 hover:border-slate-700 transition">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-medium uppercase tracking-wider">Win Rate</span>
+                    <i data-lucide="pie-chart" class="w-4 h-4 text-indigo-400"></i>
+                </div>
+                <div id="stat-win-rate" class="text-2xl font-bold text-slate-100">0%</div>
+            </div>
+
+            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800/80 hover:border-slate-700 transition">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-medium uppercase tracking-wider">Total Trades</span>
+                    <i data-lucide="activity" class="w-4 h-4 text-blue-400"></i>
+                </div>
+                <div id="stat-total-trades" class="text-2xl font-bold text-slate-100">0</div>
+            </div>
+
+            <div class="bg-slate-900/60 p-5 rounded-2xl border border-slate-800/80 hover:border-slate-700 transition">
+                <div class="flex items-center justify-between text-slate-400 mb-2">
+                    <span class="text-xs font-medium uppercase tracking-wider">Total Volume</span>
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-amber-400"></i>
+                </div>
+                <div id="stat-total-volume" class="text-2xl font-bold text-slate-100">0 Lots</div>
+            </div>
+        </section>
+
+        <!-- Filters & Controls Bar -->
+        <section class="bg-slate-900/60 p-4 rounded-2xl border border-slate-800/80 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="relative w-full md:w-80">
+                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500"></i>
+                <input type="text" id="searchInput" placeholder="Search position, comment, price..." 
+                       class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500/50 transition">
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <!-- Type Filter -->
+                <select id="typeFilter" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/50">
+                    <option value="ALL">All Types</option>
+                    <option value="BUY">Buy Only</option>
+                    <option value="SELL">Sell Only</option>
+                </select>
+
+                <!-- Profit Filter -->
+                <select id="profitFilter" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/50">
+                    <option value="ALL">All Outcomes</option>
+                    <option value="WIN">Profitable (Wins)</option>
+                    <option value="LOSS">Losses</option>
+                </select>
+
+                <!-- Comment Filter -->
+                <select id="commentFilter" class="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:border-indigo-500/50">
+                    <option value="ALL">All Strategies</option>
+                    <option value="Fibo Limit 1">Fibo Limit 1</option>
+                    <option value="RuangTrading EA">RuangTrading EA</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Tab Navigation -->
+        <div class="border-b border-slate-800 flex gap-6 text-sm font-medium">
+            <button id="tab-positions-btn" onclick="switchTab('positions')" class="pb-3 border-b-2 border-indigo-500 text-indigo-400 font-semibold flex items-center gap-2">
+                <i data-lucide="layers" class="w-4 h-4"></i> Closed Positions
+            </button>
+            <button id="tab-orders-btn" onclick="switchTab('orders')" class="pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2">
+                <i data-lucide="list-orders" class="w-4 h-4"></i> Orders Log
+            </button>
+        </div>
+
+        <!-- Closed Positions View -->
+        <main id="view-positions" class="bg-slate-900/60 rounded-2xl border border-slate-800/80 overflow-hidden shadow-2xl">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-semibold">
+                            <th class="py-3.5 px-4">Open Time</th>
+                            <th class="py-3.5 px-4">Pos ID</th>
+                            <th class="py-3.5 px-4">Symbol</th>
+                            <th class="py-3.5 px-4">Type</th>
+                            <th class="py-3.5 px-4 text-right">Vol</th>
+                            <th class="py-3.5 px-4 text-right">Open Price</th>
+                            <th class="py-3.5 px-4 text-right">S / L</th>
+                            <th class="py-3.5 px-4 text-right">T / P</th>
+                            <th class="py-3.5 px-4">Close Time</th>
+                            <th class="py-3.5 px-4 text-right">Close Price</th>
+                            <th class="py-3.5 px-4 text-right">Comm</th>
+                            <th class="py-3.5 px-4 text-right font-bold text-slate-200">Net Profit</th>
+                            <th class="py-3.5 px-4">Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positions-tbody" class="divide-y divide-slate-800/50 text-slate-300">
+                        <!-- JS populated -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Orders View (Hidden by Default) -->
+        <main id="view-orders" class="bg-slate-900/60 rounded-2xl border border-slate-800/80 overflow-hidden shadow-2xl hidden">
+            <div class="overflow-x-auto custom-scrollbar">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-950/80 text-slate-400 border-b border-slate-800 uppercase tracking-wider font-semibold">
+                            <th class="py-3.5 px-4">Open Time</th>
+                            <th class="py-3.5 px-4">Order ID</th>
+                            <th class="py-3.5 px-4">Symbol</th>
+                            <th class="py-3.5 px-4">Type</th>
+                            <th class="py-3.5 px-4 text-right">Volume</th>
+                            <th class="py-3.5 px-4 text-right">Price</th>
+                            <th class="py-3.5 px-4 text-right">S / L</th>
+                            <th class="py-3.5 px-4 text-right">T / P</th>
+                            <th class="py-3.5 px-4">Time</th>
+                            <th class="py-3.5 px-4">State</th>
+                            <th class="py-3.5 px-4">Comment</th>
+                        </tr>
+                    </thead>
+                    <tbody id="orders-tbody" class="divide-y divide-slate-800/50 text-slate-300">
+                        <!-- JS populated -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Data & Interactive Script -->
+    <script>
+        // Parsed Raw Dataset from Metatrader Report
+        const positionsData = [
+            { openTime: "2026.08.03 19:08:09", id: "431644", symbol: "XAUUSD#", type: "buy", vol: 0.03, openPrice: 4047.240, sl: 4044.708, tp: 4049.874, closeTime: "2026.08.03 19:21:53", closePrice: 4049.890, comm: -0.60, swap: 0.00, profit: 7.95, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.04 00:13:23", id: "432109", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4065.290, sl: 4061.383, tp: 4069.676, closeTime: "2026.08.04 00:20:30", closePrice: 4061.280, comm: -0.40, swap: 0.00, profit: -8.02, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.04 01:48:26", id: "432960", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4058.290, sl: 4054.165, tp: 4062.346, closeTime: "2026.08.04 02:38:41", closePrice: 4062.690, comm: -0.20, swap: 0.00, profit: 4.40, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.05 00:55:53", id: "437291", symbol: "XAUUSD#", type: "buy", vol: 0.04, openPrice: 4082.320, sl: 4079.983, tp: 4084.693, closeTime: "2026.08.05 01:00:13", closePrice: 4084.570, comm: -0.80, swap: 0.00, profit: 9.00, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.06 00:26:56", id: "441671", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4281.850, sl: 4276.117, tp: 4286.612, closeTime: "2026.08.06 00:28:26", closePrice: 4276.090, comm: -0.40, swap: 0.00, profit: -11.52, comment: "-" },
+            { openTime: "2026.08.06 01:35:14", id: "441965", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4283.720, sl: 4278.495, tp: 4289.224, closeTime: "2026.08.06 01:37:55", closePrice: 4289.030, comm: -0.20, swap: 0.00, profit: 5.31, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.07 01:47:05", id: "445423", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4255.490, sl: 4249.159, tp: 4262.049, closeTime: "2026.08.07 02:45:02", closePrice: 4249.320, comm: -0.40, swap: 0.00, profit: -12.34, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.07 03:06:18", id: "445588", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4257.070, sl: 4252.106, tp: 4261.962, closeTime: "2026.08.07 03:22:33", closePrice: 4252.050, comm: -0.20, swap: 0.00, profit: -5.02, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.09 23:05:29", id: "448876", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4345.970, sl: 4342.859, tp: 4349.264, closeTime: "2026.08.09 23:32:04", closePrice: 4342.490, comm: -0.40, swap: 0.00, profit: -6.96, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.10 00:00:03", id: "448980", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4334.540, sl: 4338.425, tp: 4329.808, closeTime: "2026.08.10 00:02:41", closePrice: 4338.880, comm: -0.20, swap: 0.00, profit: -4.34, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.11 00:00:16", id: "452104", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4401.420, sl: 4399.540, tp: 4403.641, closeTime: "2026.08.11 00:01:49", closePrice: 4399.560, comm: -0.40, swap: 0.00, profit: -3.72, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.11 02:20:01", id: "452673", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4431.420, sl: 4425.840, tp: 4437.584, closeTime: "2026.08.11 02:30:22", closePrice: 4425.800, comm: -0.20, swap: 0.00, profit: -5.62, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 03:43:13", id: "456178", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4402.910, sl: 4397.770, tp: 4415.810, closeTime: "2026.08.12 04:12:35", closePrice: 4397.640, comm: -0.20, swap: 0.00, profit: -5.27, comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 06:46:25", id: "456578", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4398.910, sl: 4404.730, tp: 4383.940, closeTime: "2026.08.12 06:55:46", closePrice: 4404.790, comm: -0.20, swap: 0.00, profit: -5.88, comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 09:25:09", id: "456865", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4420.760, sl: 4416.061, tp: 4426.850, closeTime: "2026.08.12 09:27:42", closePrice: 4415.840, comm: -0.20, swap: 0.00, profit: -4.92, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 10:01:53", id: "456969", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4415.040, sl: 4412.654, tp: 4417.608, closeTime: "2026.08.12 10:09:15", closePrice: 4417.720, comm: -0.40, swap: 0.00, profit: 5.36, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 16:00:17", id: "458590", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4420.870, sl: 4417.939, tp: 4423.826, closeTime: "2026.08.12 16:00:49", closePrice: 4423.850, comm: -0.40, swap: 0.00, profit: 5.96, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 18:37:10", id: "458955", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4411.520, sl: 4409.170, tp: 4414.184, closeTime: "2026.08.12 18:45:24", closePrice: 4414.480, comm: -0.40, swap: 0.00, profit: 5.92, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 01:37:58", id: "459677", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4426.600, sl: 4421.525, tp: 4431.695, closeTime: "2026.08.13 01:40:17", closePrice: 4421.300, comm: -0.20, swap: 0.00, profit: -5.30, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 02:00:06", id: "459738", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4408.810, sl: 4413.511, tp: 4403.523, closeTime: "2026.08.13 02:09:58", closePrice: 4413.580, comm: -0.20, swap: 0.00, profit: -4.77, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 02:25:05", id: "459779", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4407.890, sl: 4410.727, tp: 4404.110, closeTime: "2026.08.13 02:30:08", closePrice: 4403.950, comm: -0.20, swap: 0.00, profit: 3.94, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 04:05:16", id: "460014", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4396.250, sl: 4398.990, tp: 4393.499, closeTime: "2026.08.13 04:11:21", closePrice: 4393.500, comm: -0.40, swap: 0.00, profit: 5.50, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 07:50:51", id: "460318", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4372.950, sl: 4376.792, tp: 4369.160, closeTime: "2026.08.13 08:00:23", closePrice: 4369.100, comm: -0.20, swap: 0.00, profit: 3.85, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 09:23:55", id: "460456", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4379.730, sl: 4377.388, tp: 4382.118, closeTime: "2026.08.13 09:27:36", closePrice: 4382.060, comm: -0.40, swap: 0.00, profit: 4.66, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 10:10:59", id: "460500", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4383.690, sl: 4381.241, tp: 4386.103, closeTime: "2026.08.13 10:22:29", closePrice: 4386.160, comm: -0.40, swap: 0.00, profit: 4.94, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 11:45:22", id: "460606", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4385.100, sl: 4387.649, tp: 4382.351, closeTime: "2026.08.13 11:58:31", closePrice: 4388.120, comm: -0.40, swap: 0.00, profit: -6.04, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 13:00:12", id: "460759", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4399.530, sl: 4395.155, tp: 4404.290, closeTime: "2026.08.13 13:00:56", closePrice: 4394.950, comm: -0.20, swap: 0.00, profit: -4.58, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 15:10:02", id: "461433", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4371.230, sl: 4375.854, tp: 4366.598, closeTime: "2026.08.13 15:18:05", closePrice: 4366.490, comm: -0.20, swap: 0.00, profit: 4.74, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 17:15:25", id: "461644", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4370.540, sl: 4367.846, tp: 4374.200, closeTime: "2026.08.13 17:17:28", closePrice: 4367.550, comm: -0.40, swap: 0.00, profit: -5.98, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 18:28:34", id: "461716", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4357.810, sl: 4361.317, tp: 4354.182, closeTime: "2026.08.13 19:08:17", closePrice: 4354.090, comm: -0.20, swap: 0.00, profit: 3.72, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 22:40:50", id: "461945", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4361.000, sl: 4358.561, tp: 4363.778, closeTime: "2026.08.13 22:45:46", closePrice: 4358.560, comm: -0.40, swap: 0.00, profit: -4.88, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 22:50:03", id: "461962", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4356.330, sl: 4359.613, tp: 4353.614, closeTime: "2026.08.13 23:01:40", closePrice: 4353.430, comm: -0.40, swap: 0.00, profit: 5.80, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 23:05:03", id: "461982", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4350.670, sl: 4353.782, tp: 4347.540, closeTime: "2026.08.13 23:06:36", closePrice: 4353.850, comm: -0.40, swap: 0.00, profit: -6.36, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 23:10:59", id: "461994", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4357.130, sl: 4352.053, tp: 4362.376, closeTime: "2026.08.13 23:28:31", closePrice: 4362.390, comm: -0.20, swap: 0.00, profit: 5.26, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.14 00:43:18", id: "462180", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4337.410, sl: 4343.470, tp: 4331.249, closeTime: "2026.08.14 00:48:55", closePrice: 4330.650, comm: -0.20, swap: 0.00, profit: 6.76, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.14 01:06:48", id: "462276", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4332.360, sl: 4338.348, tp: 4326.239, closeTime: "2026.08.14 01:10:08", closePrice: 4325.740, comm: -0.20, swap: 0.00, profit: 6.62, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.14 02:15:02", id: "462440", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4312.420, sl: 4315.819, tp: 4309.090, closeTime: "2026.08.14 02:17:04", closePrice: 4315.970, comm: -0.20, swap: 0.00, profit: -3.55, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.14 08:42:01", id: "463052", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4347.860, sl: 4345.546, tp: 4350.388, closeTime: "2026.08.14 08:43:50", closePrice: 4345.470, comm: -0.40, swap: 0.00, profit: -4.78, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.14 11:23:36", id: "463215", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4354.330, sl: 4351.849, tp: 4356.782, closeTime: "2026.08.14 11:28:12", closePrice: 4356.850, comm: -0.40, swap: 0.00, profit: 5.04, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.14 11:56:09", id: "463301", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4366.710, sl: 4363.377, tp: 4369.893, closeTime: "2026.08.14 12:00:11", closePrice: 4369.750, comm: -0.20, swap: 0.00, profit: 3.04, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.14 12:27:20", id: "463368", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4378.210, sl: 4374.312, tp: 4382.402, closeTime: "2026.08.14 12:30:01", closePrice: 4381.210, comm: -0.20, swap: 0.00, profit: 3.00, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.14 16:40:23", id: "464348", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4387.610, sl: 4384.801, tp: 4390.495, closeTime: "2026.08.14 17:01:27", closePrice: 4384.710, comm: -0.40, swap: 0.00, profit: -5.80, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.16 23:26:57", id: "464828", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4376.430, sl: 4379.308, tp: 4373.766, closeTime: "2026.08.16 23:29:12", closePrice: 4373.310, comm: -0.40, swap: 0.00, profit: 6.24, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.17 05:00:04", id: "465791", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4391.400, sl: 4393.965, tp: 4388.372, closeTime: "2026.08.17 05:14:28", closePrice: 4387.790, comm: -0.40, swap: 0.00, profit: 7.22, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.17 05:20:39", id: "465816", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4391.390, sl: 4388.539, tp: 4394.985, closeTime: "2026.08.17 05:21:42", closePrice: 4395.160, comm: -0.40, swap: 0.00, profit: 7.54, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.17 11:31:54", id: "466347", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4402.630, sl: 4399.726, tp: 4405.563, closeTime: "2026.08.17 11:44:33", closePrice: 4399.640, comm: -0.40, swap: 0.00, profit: -5.98, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.17 12:40:46", id: "466571", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4383.300, sl: 4387.287, tp: 4379.157, closeTime: "2026.08.17 12:44:53", closePrice: 4379.130, comm: -0.20, swap: 0.00, profit: 4.17, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.17 15:15:24", id: "467288", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4420.900, sl: 4417.542, tp: 4423.997, closeTime: "2026.08.17 15:25:12", closePrice: 4423.680, comm: -0.40, swap: 0.00, profit: 5.56, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.17 17:41:13", id: "467751", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4412.830, sl: 4415.974, tp: 4410.097, closeTime: "2026.08.17 17:44:17", closePrice: 4416.010, comm: -0.40, swap: 0.00, profit: -6.36, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.17 18:35:01", id: "467832", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4400.230, sl: 4404.593, tp: 4395.651, closeTime: "2026.08.17 18:43:10", closePrice: 4404.800, comm: -0.20, swap: 0.00, profit: -4.57, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 00:20:14", id: "468431", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4425.420, sl: 4422.706, tp: 4430.055, closeTime: "2026.08.18 00:23:52", closePrice: 4429.540, comm: -0.20, swap: 0.00, profit: 4.12, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 01:00:08", id: "468484", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4433.610, sl: 4430.380, tp: 4436.552, closeTime: "2026.08.18 01:00:19", closePrice: 4430.240, comm: -0.40, swap: 0.00, profit: -6.74, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 02:05:18", id: "468712", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4402.640, sl: 4406.299, tp: 4398.889, closeTime: "2026.08.18 02:11:48", closePrice: 4398.890, comm: -0.20, swap: 0.00, profit: 3.75, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 02:36:05", id: "468785", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4397.660, sl: 4401.057, tp: 4394.276, closeTime: "2026.08.18 03:00:20", closePrice: 4401.170, comm: -0.20, swap: 0.00, profit: -3.51, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 03:21:17", id: "468871", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4397.230, sl: 4400.480, tp: 4393.832, closeTime: "2026.08.18 03:50:00", closePrice: 4393.180, comm: -0.20, swap: 0.00, profit: 4.05, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 06:36:18", id: "469136", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4396.470, sl: 4398.838, tp: 4393.895, closeTime: "2026.08.18 06:44:22", closePrice: 4398.850, comm: -0.40, swap: 0.00, profit: -4.76, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 07:35:25", id: "469216", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4397.950, sl: 4401.763, tp: 4394.334, closeTime: "2026.08.18 07:38:49", closePrice: 4401.760, comm: -0.20, swap: 0.00, profit: -3.81, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 08:40:30", id: "469322", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4397.400, sl: 4394.778, tp: 4399.904, closeTime: "2026.08.18 08:48:09", closePrice: 4394.350, comm: -0.40, swap: 0.00, profit: -6.10, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.18 16:30:21", id: "470809", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4364.880, sl: 4367.630, tp: 4362.017, closeTime: "2026.08.18 16:31:10", closePrice: 4366.880, comm: -0.40, swap: 0.00, profit: -4.00, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.19 05:35:59", id: "472191", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4338.870, sl: 4343.177, tp: 4334.530, closeTime: "2026.08.19 05:40:01", closePrice: 4343.230, comm: -0.20, swap: 0.00, profit: -4.36, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.19 07:11:17", id: "472298", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4351.920, sl: 4349.231, tp: 4354.925, closeTime: "2026.08.19 07:15:30", closePrice: 4348.970, comm: -0.40, swap: 0.00, profit: -5.90, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.19 10:20:36", id: "472523", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4367.430, sl: 4364.820, tp: 4369.915, closeTime: "2026.08.19 11:01:31", closePrice: 4370.080, comm: -0.40, swap: 0.00, profit: 5.30, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.19 12:10:18", id: "472659", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4367.210, sl: 4364.681, tp: 4369.543, closeTime: "2026.08.19 12:11:59", closePrice: 4369.530, comm: -0.40, swap: 0.00, profit: 4.64, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.19 12:43:11", id: "472791", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4408.230, sl: 4415.666, tp: 4418.090, closeTime: "2026.08.19 12:44:37", closePrice: 4415.510, comm: -0.20, swap: 0.00, profit: 7.28, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.19 13:15:03", id: "472922", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4455.970, sl: 4446.312, tp: 4465.983, closeTime: "2026.08.19 13:33:23", closePrice: 4466.080, comm: -0.20, swap: 0.00, profit: 10.11, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.19 14:12:18", id: "473146", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4469.360, sl: 4463.475, tp: 4475.117, closeTime: "2026.08.19 14:13:10", closePrice: 4475.210, comm: -0.20, swap: 0.00, profit: 5.85, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.19 14:30:05", id: "473225", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4485.330, sl: 4480.062, tp: 4490.618, closeTime: "2026.08.19 14:31:57", closePrice: 4490.360, comm: -0.20, swap: 0.00, profit: 5.03, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 00:27:13", id: "474423", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4511.810, sl: 4515.918, tp: 4507.951, closeTime: "2026.08.20 00:41:34", closePrice: 4507.940, comm: -0.20, swap: 0.00, profit: 3.87, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 01:55:08", id: "474729", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4485.860, sl: 4488.939, tp: 4482.687, closeTime: "2026.08.20 01:59:21", closePrice: 4489.040, comm: -0.40, swap: 0.00, profit: -6.36, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 05:15:31", id: "475070", symbol: "XAUUSD#", type: "sell", vol: 0.01, openPrice: 4485.990, sl: 4489.743, tp: 4482.150, closeTime: "2026.08.20 05:30:01", closePrice: 4481.750, comm: -0.20, swap: 0.00, profit: 4.24, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 07:06:21", id: "475216", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4488.950, sl: 4492.194, tp: 4485.840, closeTime: "2026.08.20 07:24:59", closePrice: 4485.810, comm: -0.40, swap: 0.00, profit: 6.28, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 09:50:24", id: "475423", symbol: "XAUUSD#", type: "sell", vol: 0.02, openPrice: 4486.140, sl: 4488.112, tp: 4483.981, closeTime: "2026.08.20 09:52:34", closePrice: 4484.030, comm: -0.40, swap: 0.00, profit: 4.22, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 10:34:15", id: "475448", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4492.710, sl: 4489.829, tp: 4495.716, closeTime: "2026.08.20 10:46:12", closePrice: 4489.890, comm: -0.40, swap: 0.00, profit: -5.64, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 14:51:30", id: "476406", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4506.250, sl: 4501.268, tp: 4511.489, closeTime: "2026.08.20 14:56:14", closePrice: 4511.390, comm: -0.20, swap: 0.00, profit: 5.14, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 15:05:10", id: "476461", symbol: "XAUUSD#", type: "buy", vol: 0.01, openPrice: 4531.430, sl: 4521.552, tp: 4542.375, closeTime: "2026.08.20 15:19:58", closePrice: 4539.560, comm: -0.20, swap: 0.00, profit: 8.13, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 15:50:14", id: "476640", symbol: "XAUUSD#", type: "buy", vol: 0.02, openPrice: 4518.780, sl: 4513.483, tp: 4524.201, closeTime: "2026.08.20 16:01:08", closePrice: 4524.160, comm: -0.40, swap: 0.00, profit: 10.76, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 17:36:09", id: "476865", symbol: "XAUUSD#", type: "buy", vol: 0.03, openPrice: 4516.430, sl: 4512.775, tp: 4520.479, closeTime: "2026.08.20 18:00:54", closePrice: 4520.860, comm: -0.60, swap: 0.00, profit: 13.29, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 19:10:36", id: "477059", symbol: "XAUUSD#", type: "buy", vol: 0.04, openPrice: 4525.080, sl: 4522.502, tp: 4527.527, closeTime: "2026.08.20 19:13:34", closePrice: 4527.620, comm: -0.80, swap: 0.00, profit: 10.16, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 19:40:57", id: "477101", symbol: "XAUUSD#", type: "buy", vol: 0.03, openPrice: 4528.010, sl: 4524.750, tp: 4531.317, closeTime: "2026.08.20 19:51:13", closePrice: 4531.210, comm: -0.60, swap: 0.00, profit: 9.60, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.20 23:07:32", id: "477516", symbol: "XAUUSD#", type: "buy", vol: 0.03, openPrice: 4528.160, sl: 4525.092, tp: 4531.629, closeTime: "2026.08.20 23:08:55", closePrice: 4525.040, comm: -0.60, swap: 0.00, profit: -9.36, comment: "Fibo Limit 1" },
+            { openTime: "2026.08.21 02:45:36", id: "478333", symbol: "XAUUSD#", type: "buy", vol: 0.03, openPrice: 4536.530, sl: 4532.886, tp: 4540.153, closeTime: "2026.08.21 02:52:07", closePrice: 4540.160, comm: -0.60, swap: 0.00, profit: 10.89, comment: "Fibo Limit 1" }
+        ];
+
+        const ordersData = [
+            { openTime: "2026.08.03 11:50:01", id: "429506", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0", price: 4059.010, sl: 4054.739, tp: 4063.255, time: "2026.08.03 12:00:04", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.03 12:20:00", id: "429611", symbol: "XAUUSD#", type: "sell limit", vol: "0.03 / 0", price: 4052.358, sl: 4055.071, tp: 4049.661, time: "2026.08.03 12:20:05", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.03 18:45:00", id: "431581", symbol: "XAUUSD#", type: "buy limit", vol: "0.04 / 0", price: 4040.501, sl: 4038.475, tp: 4042.515, time: "2026.08.03 18:45:57", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.03 19:05:00", id: "431644", symbol: "XAUUSD#", type: "buy limit", vol: "0.03 / 0.03", price: 4047.299, sl: 4044.708, tp: 4049.874, time: "2026.08.03 19:08:09", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.03 19:21:53", id: "431661", symbol: "XAUUSD#", type: "sell", vol: "0.03 / 0.03", price: 4049.874, sl: "-", tp: "-", time: "2026.08.03 19:21:53", state: "filled", comment: "[tp 4049.874]" },
+            { openTime: "2026.08.03 19:25:00", id: "431673", symbol: "XAUUSD#", type: "buy limit", vol: "0.03 / 0", price: 4052.044, sl: 4049.356, tp: 4054.716, time: "2026.08.03 19:30:14", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.04 00:10:00", id: "432109", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0.02", price: 4065.542, sl: 4061.383, tp: 4069.676, time: "2026.08.04 00:13:23", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.04 00:20:30", id: "432178", symbol: "XAUUSD#", type: "sell", vol: "0.02 / 0.02", price: 4061.383, sl: "-", tp: "-", time: "2026.08.04 00:20:30", state: "filled", comment: "[sl 4061.383]" },
+            { openTime: "2026.08.04 01:00:00", id: "432378", symbol: "XAUUSD#", type: "sell limit", vol: "0.01 / 0", price: 4050.289, sl: 4053.781, tp: 4046.818, time: "2026.08.04 01:00:02", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.04 01:45:00", id: "432960", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0.01", price: 4058.268, sl: 4054.165, tp: 4062.346, time: "2026.08.04 01:48:26", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.04 02:38:40", id: "433206", symbol: "XAUUSD#", type: "sell", vol: "0.01 / 0.01", price: 4062.346, sl: "-", tp: "-", time: "2026.08.04 02:38:41", state: "filled", comment: "[tp 4062.346]" },
+            { openTime: "2026.08.05 00:55:00", id: "437291", symbol: "XAUUSD#", type: "buy limit", vol: "0.04 / 0.04", price: 4082.345, sl: 4079.983, tp: 4084.693, time: "2026.08.05 00:55:53", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.05 01:00:12", id: "437311", symbol: "XAUUSD#", type: "sell", vol: "0.04 / 0.04", price: 4084.693, sl: "-", tp: "-", time: "2026.08.05 01:00:13", state: "filled", comment: "[tp 4084.693]" },
+            { openTime: "2026.08.06 00:25:00", id: "441669", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4281.380, sl: 4276.117, tp: 4286.612, time: "2026.08.06 00:25:40", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.06 00:26:03", id: "441671", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0.02", price: 4281.380, sl: 4276.117, tp: 4286.612, time: "2026.08.06 00:26:56", state: "filled", comment: "-" },
+            { openTime: "2026.08.06 00:28:26", id: "441677", symbol: "XAUUSD#", type: "sell", vol: "0.02 / 0.02", price: 4276.117, sl: "-", tp: "-", time: "2026.08.06 00:28:26", state: "filled", comment: "[sl 4276.117]" },
+            { openTime: "2026.08.06 00:35:00", id: "441711", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4283.857, sl: 4277.250, tp: 4290.425, time: "2026.08.06 00:35:38", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.06 00:55:00", id: "441763", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4294.288, sl: 4288.826, tp: 4299.717, time: "2026.08.06 00:55:56", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.06 01:35:00", id: "441965", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0.01", price: 4283.875, sl: 4278.495, tp: 4289.224, time: "2026.08.06 01:35:14", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.06 01:37:55", id: "441967", symbol: "XAUUSD#", type: "sell", vol: "0.01 / 0.01", price: 4289.224, sl: "-", tp: "-", time: "2026.08.06 01:37:55", state: "filled", comment: "[tp 4289.224]" },
+            { openTime: "2026.08.07 01:40:00", id: "445373", symbol: "XAUUSD#", type: "buy limit", vol: "0.04 / 0", price: 4245.282, sl: 4242.849, tp: 4247.701, time: "2026.08.07 01:40:08", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.07 01:45:00", id: "445423", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0.02", price: 4255.623, sl: 4249.159, tp: 4262.049, time: "2026.08.07 01:47:05", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.07 02:45:02", id: "445540", symbol: "XAUUSD#", type: "sell", vol: "0.02 / 0.02", price: 4249.159, sl: "-", tp: "-", time: "2026.08.07 02:45:02", state: "filled", comment: "[sl 4249.159]" },
+            { openTime: "2026.08.07 03:05:00", id: "445588", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0.01", price: 4257.048, sl: 4252.106, tp: 4261.962, time: "2026.08.07 03:06:18", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.07 03:22:33", id: "445620", symbol: "XAUUSD#", type: "sell", vol: "0.01 / 0.01", price: 4252.106, sl: "-", tp: "-", time: "2026.08.07 03:22:33", state: "filled", comment: "[sl 4252.106]" },
+            { openTime: "2026.08.07 03:30:00", id: "445641", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0", price: 4257.739, sl: 4255.514, tp: 4259.950, time: "2026.08.07 03:30:33", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.09 23:05:00", id: "448876", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0.02", price: 4346.071, sl: 4342.859, tp: 4349.264, time: "2026.08.09 23:05:29", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.09 23:32:04", id: "448917", symbol: "XAUUSD#", type: "sell", vol: "0.02 / 0.02", price: 4342.859, sl: "-", tp: "-", time: "2026.08.09 23:32:04", state: "filled", comment: "[sl 4342.859]" },
+            { openTime: "2026.08.10 00:00:01", id: "448980", symbol: "XAUUSD#", type: "sell limit", vol: "0.01 / 0.01", price: 4334.104, sl: 4338.425, tp: 4329.808, time: "2026.08.10 00:00:03", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.10 00:02:41", id: "448990", symbol: "XAUUSD#", type: "buy", vol: "0.01 / 0.01", price: 4338.425, sl: "-", tp: "-", time: "2026.08.10 00:02:41", state: "filled", comment: "[sl 4338.425]" },
+            { openTime: "2026.08.11 00:00:02", id: "452104", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0.02", price: 4401.597, sl: 4399.540, tp: 4403.641, time: "2026.08.11 00:00:16", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.11 00:01:49", id: "452113", symbol: "XAUUSD#", type: "sell", vol: "0.02 / 0.02", price: 4399.540, sl: "-", tp: "-", time: "2026.08.11 00:01:49", state: "filled", comment: "[sl 4399.540]" },
+            { openTime: "2026.08.11 01:50:08", id: "452480", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4424.226, sl: 4417.813, tp: 4430.602, time: "2026.08.11 01:53:45", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.11 02:15:00", id: "452673", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0.01", price: 4431.729, sl: 4425.840, tp: 4437.584, time: "2026.08.11 02:20:01", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.11 02:30:21", id: "452707", symbol: "XAUUSD#", type: "sell", vol: "0.01 / 0.01", price: 4425.840, sl: "-", tp: "-", time: "2026.08.11 02:30:22", state: "filled", comment: "[sl 4425.840]" },
+            { openTime: "2026.08.12 01:48:13", id: "455981", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0", price: 4391.719, sl: 4388.655, tp: 4394.765, time: "2026.08.12 01:48:14", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 02:02:54", id: "455988", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4388.677, sl: 4385.220, tp: 4397.350, time: "2026.08.12 02:10:01", state: "canceled", comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 02:02:55", id: "455989", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4388.677, sl: 4385.220, tp: 4397.350, time: "2026.08.12 02:10:08", state: "canceled", comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 03:06:55", id: "456173", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4402.487, sl: 4397.770, tp: 4414.320, time: "2026.08.12 03:10:36", state: "canceled", comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 03:10:47", id: "456178", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0.01", price: 4402.911, sl: 4397.770, tp: 4415.810, time: "2026.08.12 03:43:13", state: "filled", comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 04:12:35", id: "456232", symbol: "XAUUSD#", type: "sell", vol: "0.01 / 0.01", price: 4397.770, sl: "-", tp: "-", time: "2026.08.12 04:12:35", state: "filled", comment: "[sl 4397.770]" },
+            { openTime: "2026.08.12 06:44:02", id: "456572", symbol: "XAUUSD#", type: "sell limit", vol: "0.01 / 0", price: 4398.690, sl: 4404.570, tp: 4383.940, time: "2026.08.12 06:44:30", state: "canceled", comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 06:44:41", id: "456576", symbol: "XAUUSD#", type: "sell limit", vol: "0.01 / 0", price: 4398.690, sl: 4404.570, tp: 4383.940, time: "2026.08.12 06:44:51", state: "canceled", comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 06:45:02", id: "456578", symbol: "XAUUSD#", type: "sell limit", vol: "0.01 / 0.01", price: 4398.805, sl: 4404.730, tp: 4383.940, time: "2026.08.12 06:46:25", state: "filled", comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 06:55:46", id: "456598", symbol: "XAUUSD#", type: "buy", vol: "0.01 / 0.01", price: 4404.730, sl: "-", tp: "-", time: "2026.08.12 06:55:46", state: "filled", comment: "[sl 4404.730]" },
+            { openTime: "2026.08.12 09:05:02", id: "456794", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0", price: 4406.453, sl: 4403.333, tp: 4409.555, time: "2026.08.12 09:10:18", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 09:25:00", id: "456865", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0.01", price: 4421.471, sl: 4416.061, tp: 4426.850, time: "2026.08.12 09:25:09", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 09:27:42", id: "456888", symbol: "XAUUSD#", type: "sell", vol: "0.01 / 0.01", price: 4416.061, sl: "-", tp: "-", time: "2026.08.12 09:27:42", state: "filled", comment: "[sl 4416.061]" },
+            { openTime: "2026.08.12 10:00:00", id: "456969", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0.02", price: 4415.138, sl: 4412.654, tp: 4417.608, time: "2026.08.12 10:01:53", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 10:09:15", id: "456977", symbol: "XAUUSD#", type: "sell", vol: "0.02 / 0.02", price: 4417.608, sl: "-", tp: "-", time: "2026.08.12 10:09:15", state: "filled", comment: "[tp 4417.608]" },
+            { openTime: "2026.08.12 11:12:05", id: "457038", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4408.050, sl: 4401.700, tp: 4423.980, time: "2026.08.12 11:18:58", state: "canceled", comment: "RuangTrading EA" },
+            { openTime: "2026.08.12 13:50:00", id: "457979", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4425.076, sl: 4418.683, tp: 4431.431, time: "2026.08.12 13:53:38", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 16:00:00", id: "458590", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0.02", price: 4420.891, sl: 4417.939, tp: 4423.826, time: "2026.08.12 16:00:17", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 16:00:49", id: "458593", symbol: "XAUUSD#", type: "sell", vol: "0.02 / 0.02", price: 4423.826, sl: "-", tp: "-", time: "2026.08.12 16:00:49", state: "filled", comment: "[tp 4423.826]" },
+            { openTime: "2026.08.12 17:40:00", id: "458781", symbol: "XAUUSD#", type: "sell limit", vol: "0.01 / 0", price: 4406.435, sl: 4409.790, tp: 4403.101, time: "2026.08.12 17:43:10", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 18:35:00", id: "458955", symbol: "XAUUSD#", type: "buy limit", vol: "0.02 / 0.02", price: 4411.684, sl: 4409.170, tp: 4414.184, time: "2026.08.12 18:37:10", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.12 18:45:24", id: "458993", symbol: "XAUUSD#", type: "sell", vol: "0.02 / 0.02", price: 4414.184, sl: "-", tp: "-", time: "2026.08.12 18:45:24", state: "filled", comment: "[tp 4414.184]" },
+            { openTime: "2026.08.12 22:05:00", id: "459163", symbol: "XAUUSD#", type: "sell limit", vol: "0.02 / 0", price: 4406.797, sl: 4409.810, tp: 4403.802, time: "2026.08.12 22:05:53", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 00:20:00", id: "459399", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0", price: 4426.908, sl: 4421.726, tp: 4432.059, time: "2026.08.13 00:22:58", state: "canceled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 01:35:00", id: "459677", symbol: "XAUUSD#", type: "buy limit", vol: "0.01 / 0.01", price: 4426.625, sl: 4421.525, tp: 4431.695, time: "2026.08.13 01:37:58", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 01:40:16", id: "459687", symbol: "XAUUSD#", type: "sell", vol: "0.01 / 0.01", price: 4421.525, sl: "-", tp: "-", time: "2026.08.13 01:40:17", state: "filled", comment: "[sl 4421.525]" },
+            { openTime: "2026.08.13 02:00:03", id: "459738", symbol: "XAUUSD#", type: "sell limit", vol: "0.01 / 0.01", price: 4408.502, sl: 4413.511, tp: 4403.523, time: "2026.08.13 02:00:06", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 02:09:57", id: "459745", symbol: "XAUUSD#", type: "buy", vol: "0.01 / 0.01", price: 4413.511, sl: "-", tp: "-", time: "2026.08.13 02:09:58", state: "filled", comment: "[sl 4413.511]" },
+            { openTime: "2026.08.13 02:25:00", id: "459779", symbol: "XAUUSD#", type: "sell limit", vol: "0.01 / 0.01", price: 4407.409, sl: 4410.727, tp: 4404.110, time: "2026.08.13 02:25:05", state: "filled", comment: "Fibo Limit 1" },
+            { openTime: "2026.08.13 02:30:08", id: "459785", symbol: "XAUUSD#", type: "buy", vol: "0.01 / 0.01", price: 4404.110, sl: "-", tp: "-", time: "2026.08.13 02:30:08", state: "filled", comment: "[tp 4404.110]" }
+        ];
+
+        // Core Render Function
+        function renderTables() {
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const typeVal = document.getElementById('typeFilter').value;
+            const profitVal = document.getElementById('profitFilter').value;
+            const commentVal = document.getElementById('commentFilter').value;
+
+            // Filter Positions
+            const filteredPositions = positionsData.filter(item => {
+                const matchesSearch = item.id.includes(searchVal) || 
+                                      item.symbol.toLowerCase().includes(searchVal) || 
+                                      item.comment.toLowerCase().includes(searchVal) ||
+                                      item.openPrice.toString().includes(searchVal);
+                
+                const matchesType = typeVal === 'ALL' || item.type.toUpperCase() === typeVal;
+                const matchesProfit = profitVal === 'ALL' || (profitVal === 'WIN' ? item.profit > 0 : item.profit <= 0);
+                const matchesComment = commentVal === 'ALL' || item.comment.includes(commentVal);
+
+                return matchesSearch && matchesType && matchesProfit && matchesComment;
+            });
+
+            // Calculate Metrics on Filtered/Total Data
+            let totalProfit = 0;
+            let winCount = 0;
+            let totalLots = 0;
+
+            filteredPositions.forEach(p => {
+                totalProfit += p.profit + p.comm;
+                if (p.profit > 0) winCount++;
+                totalLots += p.vol;
+            });
+
+            const winRate = filteredPositions.length > 0 ? ((winCount / filteredPositions.length) * 100).toFixed(1) : 0;
+
+            // Update UI Stats
+            const netProfitElem = document.getElementById('stat-net-profit');
+            netProfitElem.innerText = `$${totalProfit.toFixed(2)}`;
+            netProfitElem.className = `text-2xl font-bold ${totalProfit >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+            
+            document.getElementById('stat-win-rate').innerText = `${winRate}%`;
+            document.getElementById('stat-total-trades').innerText = filteredPositions.length;
+            document.getElementById('stat-total-volume').innerText = `${totalLots.toFixed(2)} Lots`;
+
+            // Populate Positions Table
+            const posTbody = document.getElementById('positions-tbody');
+            posTbody.innerHTML = '';
+
+            filteredPositions.forEach(p => {
+                const isWin = p.profit > 0;
+                const netTradeProfit = (p.profit + p.comm).toFixed(2);
+                
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/30';
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-slate-400 whitespace-nowrap">${p.openTime}</td>
+                    <td class="py-3 px-4 font-mono text-slate-300">${p.id}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-200">${p.symbol}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${p.type === 'buy' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
+                            ${p.type}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-300">${p.vol.toFixed(2)}</td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-300">${p.openPrice.toFixed(3)}</td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-400">${p.sl ? p.sl.toFixed(3) : '-'}</td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-400">${p.tp ? p.tp.toFixed(3) : '-'}</td>
+                    <td class="py-3 px-4 text-slate-400 whitespace-nowrap">${p.closeTime}</td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-300">${p.closePrice.toFixed(3)}</td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-400">${p.comm.toFixed(2)}</td>
+                    <td class="py-3 px-4 text-right font-mono font-bold ${isWin ? 'text-emerald-400' : 'text-rose-400'}">
+                        ${netTradeProfit > 0 ? '+' : ''}${netTradeProfit}
+                    </td>
+                    <td class="py-3 px-4 text-slate-400">
+                        <span class="px-2 py-0.5 bg-slate-800/80 rounded text-[11px] border border-slate-700/50">${p.comment}</span>
+                    </td>
+                `;
+                posTbody.appendChild(row);
+            });
+
+            // Populate Orders Table
+            const ordersTbody = document.getElementById('orders-tbody');
+            ordersTbody.innerHTML = '';
+
+            ordersData.forEach(o => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/30';
+                row.innerHTML = `
+                    <td class="py-3 px-4 text-slate-400 whitespace-nowrap">${o.openTime}</td>
+                    <td class="py-3 px-4 font-mono text-slate-300">${o.id}</td>
+                    <td class="py-3 px-4 font-semibold text-slate-200">${o.symbol}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${o.type.includes('buy') ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
+                            ${o.type}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-300">${o.vol}</td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-300">${typeof o.price === 'number' ? o.price.toFixed(3) : o.price}</td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-400">${typeof o.sl === 'number' ? o.sl.toFixed(3) : o.sl}</td>
+                    <td class="py-3 px-4 text-right font-mono text-slate-400">${typeof o.tp === 'number' ? o.tp.toFixed(3) : o.tp}</td>
+                    <td class="py-3 px-4 text-slate-400 whitespace-nowrap">${o.time}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-0.5 rounded text-[10px] font-semibold ${o.state === 'filled' ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20' : 'bg-slate-800 text-slate-400'}">
+                            ${o.state}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-slate-400">${o.comment}</td>
+                `;
+                ordersTbody.appendChild(row);
+            });
+        }
+
+        // View Switching Logic
+        function switchTab(tab) {
+            const posView = document.getElementById('view-positions');
+            const ordersView = document.getElementById('view-orders');
+            const posBtn = document.getElementById('tab-positions-btn');
+            const ordersBtn = document.getElementById('tab-orders-btn');
+
+            if (tab === 'positions') {
+                posView.classList.remove('hidden');
+                ordersView.classList.add('hidden');
+                posBtn.className = "pb-3 border-b-2 border-indigo-500 text-indigo-400 font-semibold flex items-center gap-2";
+                ordersBtn.className = "pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2";
+            } else {
+                posView.classList.add('hidden');
+                ordersView.classList.remove('hidden');
+                ordersBtn.className = "pb-3 border-b-2 border-indigo-500 text-indigo-400 font-semibold flex items-center gap-2";
+                posBtn.className = "pb-3 border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-2";
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('searchInput').addEventListener('input', renderTables);
+        document.getElementById('typeFilter').addEventListener('change', renderTables);
+        document.getElementById('profitFilter').addEventListener('change', renderTables);
+        document.getElementById('commentFilter').addEventListener('change', renderTables);
+
+        // Initial Initialization
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderTables();
+        });
+    </script>
+</body>
+</html>
